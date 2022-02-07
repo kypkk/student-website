@@ -1,0 +1,40 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+body {
+  color: black;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: Helvetica, sans-serif;
+
+  ul {
+    list-style-type: none;
+    li {
+      font-size: 1.15rem;
+      font-weight: 500;
+      a {
+        font-size: 1.15rem;
+        font-weight: 500;
+        text-decoration: none;
+        color: black;
+        &:hover {
+          color: cadetblue;
+        }
+      }
+    }
+  }
+  a {
+    font-size: 1.15rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: black;
+    &:hover {
+      color: cadetblue;
+    }
+  }
+}
