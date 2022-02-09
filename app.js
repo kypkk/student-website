@@ -32,10 +32,10 @@ app.get("/", (req, res) => {
 app.get("/students", async (req, res) => {
   try {
     let data = await Student.find();
-    res.render("students.ejs", { data });
+    res.send(data);
   } catch (e) {
     console.log(e);
-    res.send("Error!!");
+    res.send({ message: "Error!!" });
   }
 });
 
@@ -55,12 +55,12 @@ app.post("/students/insert", (req, res) => {
     .save()
     .then(() => {
       console.log("Student Accepted");
-      res.render("accepted.ejs");
+      res.send("New student has post successfully!");
     })
     .catch((e) => {
+      res.status(404);
       console.log("Student rejected");
-      console.log(e);
-      res.render("rejected");
+      res.send(e);
     });
 });
 
@@ -80,17 +80,46 @@ app.get("/students/edit/:id", async (req, res) => {
 });
 
 app.put("/students/edit/:id", async (req, res) => {
-  let { id } = req.params;
-  let { name, age, merit, other } = req.body;
+  let { id, name, age, merit, other } = req.body;
   try {
     let d = await Student.findOneAndUpdate(
       { id },
       { id, name, age, scholarship: { merit, other } },
       { new: true, runValidators: true }
     );
-    res.redirect(`/students/${id}`);
+    res.send("successfully update the data");
   } catch {
-    res.render("rejected.ejs");
+    res.render("fail with update");
+  }
+});
+
+class newdata {
+  constructor() {}
+  setProperty(key, value) {
+    if (key !== "merit" && key !== "other") {
+      this[key] = value;
+    } else {
+      this[`scholarship.${key}`] = value;
+    }
+  }
+}
+
+app.patch("/students/edit/:id", async (req, res) => {
+  let { id } = req.params;
+  let newObject = new newdata();
+  for (let property in req.body) {
+    newObject.setProperty(property, req.body[property]);
+  }
+
+  try {
+    let d = await Student.findOneAndUpdate({ id }, newObject, {
+      new: true,
+      runValidators: true,
+    });
+    res.send("successfully update the data");
+    console.log(d);
+  } catch {
+    res.render("fail with update");
   }
 });
 
@@ -99,9 +128,12 @@ app.get("/students/:id", async (req, res) => {
     let { id } = req.params;
     let data = await Student.findOne({ id });
     if (data !== null) {
-      res.render("studentfile", { data });
+      res.send(data);
     } else {
-      res.send("Cannot find this student. Please enter a valid id");
+      res.status(404);
+      res.send({
+        message: "Cannot find this student. Please enter a valid id",
+      });
     }
   } catch (e) {
     console.log(e);
@@ -115,6 +147,19 @@ app.delete("/students/delete/:id", (req, res) => {
     .then((meg) => {
       console.log(meg);
       res.send("Successfully deleted!");
+    })
+    .catch((e) => {
+      console.log(e);
+      res.send("Delettion failed!");
+    });
+});
+
+app.delete("/students/delete/", (req, res) => {
+  let { id } = req.params;
+  Student.deleteMany({})
+    .then((meg) => {
+      console.log(meg);
+      res.send("Successfully deleted all of the datas!");
     })
     .catch((e) => {
       console.log(e);
